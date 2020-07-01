@@ -1,0 +1,14 @@
+__pycache__/
+
+.DS_Store
+
+.env
+
+docker-compose.override.yml
+
+*.pyc
+
+.mypy_cache
+
+.coverage
+coverage.xml

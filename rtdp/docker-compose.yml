@@ -1,0 +1,64 @@
+version: "3.7"
+services:
+  publisher:
+    build:
+      context: .
+      target: dev-rtdp
+    image: dev-rtdp:latest
+    volumes:
+      - ./:/opt/rtdp
+      - ./dev:/opt/dev
+    command: ["sh", "-u","./scripts/poll.sh"]  
+    depends_on:
+      - kafka
+      - elasticsearch
+  consumer:
+    build:
+      context: .
+      target: dev-rtdp
+    image: dev-rtdp:latest
+    command: ["faust", "-A", "rtdp.consumer.app:APP", "worker", "-l", "info"]
+    volumes:
+      - ./:/opt/rtdp
+      - ./dev:/opt/dev
+    depends_on:
+      - elasticsearch
+      - kafka
+    environment:
+      - BACKING_ES_INDEX=rtdp
+  zookeeper:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
+  kafka:
+    image: wurstmeister/kafka
+    expose:
+      - 9092
+    ports:
+      - 9092:9092
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "dev-rtdp-topic:1:1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  elasticsearch:
+    image: elasticsearch:7.8.0
+    expose:
+      - 9200
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      discovery.type: single-node
+  kibana:
+    image: kibana:7.8.0
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    environment:
+      - KAFKA_BROKERS=kafka:9092
+      - KIBANA_ELASTICSEARCH_HOSTS=${KIBANA_ELASTICSEARCH_HOSTS:-http://es:9200}
