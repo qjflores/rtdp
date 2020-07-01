@@ -8,7 +8,7 @@ services:
     volumes:
       - ./:/opt/rtdp
       - ./dev:/opt/dev
-    command: ["sh", "-u","./scripts/poll.sh"]  
+    command: ["sh","./scripts/poll.sh"]
     depends_on:
       - kafka
       - elasticsearch
