@@ -2,6 +2,10 @@
 
 rtdp is a real time data pipeline application that uses Apache Kafka, the Faust python library from Robinhood, and Elasticsearch.
 
+The publisher polls the coindesk api and publishes a message to a Kafka topic.
+
+The consumer subscribes to the kafka topic, pulls messages as they come in and then adds the data to elasticsearch document store.
+
 # Installation and Usage
 
 1. Pull images from Docker hub.
